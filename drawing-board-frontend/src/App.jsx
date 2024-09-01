@@ -12,7 +12,7 @@ const App = () => {
 
   const handleSelectBoard = (boardId) => {
     setSelectedBoardId(boardId);
-    navigate(`/board/${boardId}`); // Navigate to the board's page using its ID
+    navigate(`/board/${boardId}`);
   };
 
   const handleCreateBoard = async (newBoard) => {

@@ -14,8 +14,8 @@ const CreateBoard = ({ onCreateBoard }) => {
     try {
       const newBoard = await createBoard(boardName);
       onCreateBoard(newBoard);
-      setBoardName(''); // Clear input field after successful creation
-      setError(''); // Clear error message
+      setBoardName('');
+      setError(''); 
     } catch (error) {
       setError('Failed to create board. Please try again.');
       console.error('Failed to create board:', error);

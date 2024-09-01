@@ -8,16 +8,15 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5173", // Your frontend URL
+    origin: "https://collaborative-drawing-bo-25f95.web.app",
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   },
 });
 
-// Configure CORS for HTTP requests
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend URL
+    origin: "https://collaborative-drawing-bo-25f95.web.app",
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   })
@@ -25,7 +24,8 @@ app.use(
 
 app.use(express.json());
 
-const uri = "mongodb+srv://drawingBoardUser:hw4hvI6nWe8EaKV3@cluster0.xmw7zrv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri =
+  "mongodb+srv://drawingBoardUser:hw4hvI6nWe8EaKV3@cluster0.xmw7zrv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const client = new MongoClient(uri);
 
 let db, boardCollection;
@@ -41,8 +41,7 @@ client
     console.error("Error connecting to MongoDB:", error);
   });
 
-// Routes
-const getBoards = async (req, res) => {
+app.get("/api/boards", async (req, res) => {
   try {
     const boards = await boardCollection.find({}).toArray();
     res.status(200).json(boards);
@@ -50,9 +49,9 @@ const getBoards = async (req, res) => {
     console.error("Error fetching boards:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-};
+});
 
-const createBoard = async (req, res) => {
+app.post("/api/boards", async (req, res) => {
   const { name } = req.body;
   try {
     const result = await boardCollection.insertOne({ name, elements: [] });
@@ -64,9 +63,9 @@ const createBoard = async (req, res) => {
     console.error("Error creating board:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-};
+});
 
-const getBoardById = async (req, res) => {
+app.get("/api/boards/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const board = await boardCollection.findOne({ _id: new ObjectId(id) });
@@ -79,9 +78,9 @@ const getBoardById = async (req, res) => {
     console.error("Error fetching board:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-};
+});
 
-const updateBoard = async (req, res) => {
+app.post("/api/updateBoard", async (req, res) => {
   const { boardId, element } = req.body;
   try {
     await boardCollection.updateOne(
@@ -93,12 +92,7 @@ const updateBoard = async (req, res) => {
     console.error("Error updating board:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-};
-
-app.get("/api/boards", getBoards);
-app.post("/api/boards", createBoard);
-app.get("/api/boards/:id", getBoardById);
-app.post("/api/updateBoard", updateBoard);
+});
 
 io.on("connection", (socket) => {
   console.log("A user connected");
@@ -131,17 +125,20 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on('erase', async (data) => {
+  socket.on("erase", async (data) => {
     const { boardId, element } = data;
     try {
-      const updatedBoard = await boardCollection.updateOne(
+      const result = await boardCollection.updateOne(
         { _id: new ObjectId(boardId) },
-        { $pull: { elements: { startX: element.startX, startY: element.startY, tool: element.tool } } }
+        { $pull: { elements: { id: element.id } } }
       );
-      io.to(boardId).emit('erase', element);
-      console.log(`Erase event on board ${boardId}:`, element);
+      if (result.modifiedCount > 0) {
+        io.to(boardId).emit("erase", element);
+      } else {
+        console.error("No matching element found to erase.");
+      }
     } catch (error) {
-      console.error('Error erasing element:', error);
+      console.error("Error erasing element:", error);
     }
   });
 
@@ -150,6 +147,5 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start the server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

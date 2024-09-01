@@ -1,6 +1,6 @@
 const { MongoClient, ObjectId } = require('mongodb');
 
-const uri = "your-mongodb-uri-here";
+const uri = "mongodb+srv://drawingBoardUser:hw4hvI6nWe8EaKV3@cluster0.xmw7zrv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const client = new MongoClient(uri);
 
 let db, boardCollection;
@@ -14,7 +14,7 @@ async function connectToDB() {
       console.log('Database connected and collection initialized.');
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
-      throw error; // Ensure the error bubbles up
+      throw error;
     }
   }
 }

@@ -1,10 +1,7 @@
 
-const API_URL = 'http://localhost:5000/api/boards';
+const API_URL = 'https://collaborative-drawing-board-backend.onrender.com/api/boards';
 
-/**
- * Fetches the list of boards from the backend.
- * @returns {Promise<Array>} - A promise that resolves to an array of boards.
- */
+
 export const fetchBoards = async () => {
   try {
     const response = await fetch(API_URL);
@@ -19,11 +16,7 @@ export const fetchBoards = async () => {
   }
 };
 
-/**
- * Creates a new board with the given name.
- * @param {string} name - The name of the new board.
- * @returns {Promise<Object>} - A promise that resolves to the newly created board object.
- */
+
 export const createBoard = async (name) => {
   try {
     const response = await fetch(API_URL, {
@@ -31,7 +24,7 @@ export const createBoard = async (name) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, elements: [] }), // Ensure elements array is included
+      body: JSON.stringify({ name, elements: [] }),
     });
     if (!response.ok) {
       throw new Error('Failed to create board');
@@ -44,11 +37,6 @@ export const createBoard = async (name) => {
   }
 };
 
-/**
- * Joins an existing board with the given ID.
- * @param {string} boardId - The ID of the board to join.
- * @returns {Promise<Object>} - A promise that resolves to the board object.
- */
 export const joinBoard = async (boardId) => {
   try {
     const response = await fetch(`${API_URL}/${boardId}`, {
